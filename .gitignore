@@ -355,4 +355,4 @@ MigrationBackup/
 *.bin
 *.png
 *.bat
-Config.cs
+*Config.cs
