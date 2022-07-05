@@ -9,16 +9,20 @@ namespace P01_StudentSystem.Data.Models
 {
     public class Student
     {
+        public Student()
+        {
+            this.CourseEnrollments = new HashSet<StudentCourse>();
+            this.HomeworkSubmissions = new HashSet<Homework>();
+        }
+
         [Key]
         public int StudentId { get; set; }
 
         [Required]
         [Column(TypeName = "nvarchar(100)")]
-
         public string Name { get; set; }
 
         [Column(TypeName = "varchar(10)")]
-
         public string PhoneNumber { get; set; }
 
         public bool RegisteredOn { get; set; }
@@ -26,5 +30,10 @@ namespace P01_StudentSystem.Data.Models
         public DateTime? Birthday { get; set; }
 
         public ContentType ContentType { get; set; }
+
+        public virtual ICollection<StudentCourse> CourseEnrollments { get; set; }
+
+        public virtual ICollection<Homework> HomeworkSubmissions { get; set; }
+
     }
 }
