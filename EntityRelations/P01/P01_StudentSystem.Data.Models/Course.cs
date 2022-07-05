@@ -17,20 +17,22 @@ namespace P01_StudentSystem.Data.Models
         }
 
         [Key]
-        public int CourseId { get; set; }
+        public int CourseId { get; set; } //
 
         [Required]
         [Column(TypeName = "nvarchar(80)")]
-        public string Name { get; set; }
+        public string Name { get; set; } //
 
         [Column(TypeName = "nvarchar(max)")]
-        public string Description { get; set; }
+        public string Description { get; set; } //
 
-        public DateTime StartDate { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime StartDate { get; set; } //
 
-        public DateTime EndDate { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime EndDate { get; set; } //
 
-        public decimal Price { get; set; }
+        public decimal Price { get; set; } //
 
         public virtual ICollection<StudentCourse> StudentsEnrolled { get; set; }
 

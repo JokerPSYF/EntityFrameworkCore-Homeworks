@@ -16,20 +16,20 @@ namespace P01_StudentSystem.Data.Models
         }
 
         [Key]
-        public int StudentId { get; set; }
+        public int StudentId { get; set; } //
 
         [Required]
         [Column(TypeName = "nvarchar(100)")]
-        public string Name { get; set; }
+        public string Name { get; set; } //
 
         [Column(TypeName = "varchar(10)")]
-        public string PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; } //
 
-        public bool RegisteredOn { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime RegisteredOn { get; set; } //
 
-        public DateTime? Birthday { get; set; }
-
-        public ContentType ContentType { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime? Birthday { get; set; } //
 
         public virtual ICollection<StudentCourse> CourseEnrollments { get; set; }
 
