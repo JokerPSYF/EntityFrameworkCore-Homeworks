@@ -1,8 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20220706211306_InitialSetup.cs" />
+    <Compile Remove="Migrations\20220706211306_InitialSetup.Designer.cs" />
+    <Compile Remove="Migrations\20220706214441_DeleteBehaviorNoAction.cs" />
+    <Compile Remove="Migrations\20220706214441_DeleteBehaviorNoAction.Designer.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" />
@@ -10,6 +17,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\P03_FootballBetting.Data.Models\P03_FootballBetting.Data.Models.csproj" />
   </ItemGroup>
 
 </Project>

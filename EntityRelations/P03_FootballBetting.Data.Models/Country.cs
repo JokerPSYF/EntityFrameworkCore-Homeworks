@@ -13,7 +13,7 @@ namespace P03_FootballBetting.Data.Models
         }
 
         [Key]
-        public int ColorId{ get; set; }
+        public int CountryId{ get; set; }
 
         [Required]
         [MaxLength(100)]

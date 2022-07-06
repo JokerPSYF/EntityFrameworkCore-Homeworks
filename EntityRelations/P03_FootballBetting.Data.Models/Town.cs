@@ -14,7 +14,7 @@ namespace P03_FootballBetting.Data.Models
         }
 
         [Key]
-        public int Id { get; set; }
+        public int TownId { get; set; }
 
         [Required]
         [MaxLength(50)]

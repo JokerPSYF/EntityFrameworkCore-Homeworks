@@ -15,8 +15,9 @@ namespace P03_FootballBetting.Data.Models
         [Key]
         public int UserId { get; set; }
 
+        [Required]
         [MaxLength(30)]
-        public string UserName { get; set; }
+        public string Username { get; set; }
 
         [Required]
         [MaxLength(32)]

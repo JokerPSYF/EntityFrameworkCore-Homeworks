@@ -30,7 +30,8 @@ namespace P03_FootballBetting.Data.Models
 
         public byte AwayTeamGoals { get; set; }
 
-        public DateTime? DateTime { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime DateTime { get; set; }
 
         public decimal HomeTeamBetRate { get; set; }
 
