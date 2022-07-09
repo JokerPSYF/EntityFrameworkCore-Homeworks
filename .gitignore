@@ -9,6 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.csproj
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -356,3 +357,4 @@ MigrationBackup/
 *.png
 *.bat
 *Config.cs
+*DbInitializer.cs
