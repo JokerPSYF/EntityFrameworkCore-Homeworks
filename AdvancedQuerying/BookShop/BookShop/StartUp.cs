@@ -1,12 +1,14 @@
-﻿using System;
+﻿using BookShop.Data;
+using BookShop.Initializer;
 
 namespace BookShop
 {
-    internal class StartUp
+    public class StartUp
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            using var db = new BookShopContext();
+            DbInitializer.ResetDatabase(db);
         }
     }
 }
