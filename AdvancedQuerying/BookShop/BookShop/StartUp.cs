@@ -18,8 +18,7 @@ namespace BookShop
             //string input = Console.ReadLine();
             //int input = int.Parse(Console.ReadLine());
 
-
-            Console.WriteLine(CountCopiesByAuthor(db));
+            Console.WriteLine(RemoveBooks(db));
         }
 
         /// <summary>
@@ -292,6 +291,121 @@ namespace BookShop
             }
 
             return output.ToString().TrimEnd();
+        }
+
+        /// <summary>
+        /// Return the total profit of all books by category.
+        /// Profit for a book can be calculated by multiplying
+        /// its number of copies by the price per single book.
+        /// Order the results by descending by total profit for category and ascending by category name.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string GetTotalProfitByCategory(BookShopContext context)
+        {
+            StringBuilder output = new StringBuilder();
+
+            var categories = context
+                .Categories
+                .Select(c => new
+                {
+                    c.Name,
+                    CategoryProfit = c.CategoryBooks.Sum(b => b.Book.Copies * b.Book.Price)
+                })
+                .OrderByDescending(c => c.CategoryProfit)
+                .ThenBy(c => c.Name)
+                .ToArray();
+
+            foreach (var category in categories)
+            {
+                output.AppendLine($"{category.Name} ${category.CategoryProfit:f2}");
+            }
+
+            return output.ToString().TrimEnd();
+        }
+
+        /// <summary>
+        /// Get the most recent books by categories.
+        /// The categories should be ordered by name alphabetically.
+        /// Only take the top 3 most recent books from each category
+        /// - ordered by release date (descending).
+        /// Select and print the category name, and for each book
+        /// – its title and release year.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string GetMostRecentBooks(BookShopContext context)
+        {
+            StringBuilder output = new StringBuilder();
+
+            var booksByCategories = context
+                .Categories
+                .Select(c => new
+                {
+                    c.Name,
+                    Books = c.CategoryBooks.Select(b => new
+                    {
+                        b.Book.Title,
+                        Date = b.Book.ReleaseDate.Value
+                    })
+                    .OrderByDescending(b => b.Date)
+                    .Take(3)
+                })
+                .OrderBy(c => c.Name)
+                .ToArray();
+
+            foreach (var category in booksByCategories)
+            {
+                output.AppendLine($"--{category.Name}");
+                foreach (var book in category.Books)
+                {
+                    output.AppendLine($"{book.Title} ({book.Date.Year})");
+                }
+            }
+
+            return output.ToString().TrimEnd();
+        }
+
+        /// <summary>
+        /// Increase the prices of all books released before 2010 by 5.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static void IncreasePrices(BookShopContext context)
+        {
+            var books = context
+                .Books
+                .Where(b => b.ReleaseDate.Value.Year < 2010)
+                .ToArray();
+
+            foreach (var book in books)
+            {
+                book.Price += 5;
+            }
+
+            context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Remove all books, which have less than 4200 copies.
+        /// Return an int - the number of books that were deleted from the database.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static int RemoveBooks(BookShopContext context)
+        {
+            var books = context
+                .Books
+                .Where(b => b.Copies < 4200)
+                .ToArray();
+
+            int booksCount = books.Count();
+
+            context.RemoveRange(books);
+
+            context.SaveChanges();
+            
+            return booksCount;
         }
     }
 }
