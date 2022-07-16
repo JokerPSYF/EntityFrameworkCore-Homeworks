@@ -1,5 +1,11 @@
 ﻿using BookShop.Data;
 using BookShop.Initializer;
+using BookShop.Models.Enums;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace BookShop
 {
@@ -8,7 +14,284 @@ namespace BookShop
         static void Main(string[] args)
         {
             using var db = new BookShopContext();
-            DbInitializer.ResetDatabase(db);
+            //DbInitializer.ResetDatabase(db);
+            //string input = Console.ReadLine();
+            //int input = int.Parse(Console.ReadLine());
+
+
+            Console.WriteLine(CountCopiesByAuthor(db));
+        }
+
+        /// <summary>
+        /// Return in a single string all book titles,
+        /// each on a new line, that have age restriction,
+        /// equal to the given command. Order the titles alphabetically.
+        ///Read input from the console in your main method,
+        ///and call your method with the necessary arguments.
+        ///Print the returned string to the console. Ignore casing of the input.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public static string GetBooksByAgeRestriction(BookShopContext context, string command)
+        {
+            AgeRestriction ageRestriction;
+
+            bool isParsed = Enum.TryParse<AgeRestriction>(command, true, out ageRestriction);
+            if (!isParsed) return string.Empty;
+
+            var books = context
+                .Books
+                .Where(b => b.AgeRestriction == ageRestriction)
+                .Select(b => b.Title)
+                .OrderBy(title => title)
+                .ToArray();
+
+            return String.Join(Environment.NewLine, books);
+        }
+
+        /// <summary>
+        /// Return in a single string titles of the golden edition books that have less than 5000 copies,
+        /// each on a new line. Order them by book id ascending.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string GetGoldenBooks(BookShopContext context)
+        {
+            var goldenBooks = context
+                .Books
+                .Where(b => b.EditionType == EditionType.Gold &&
+                        b.Copies < 5000)
+                .Select(b => b.Title)
+                .ToArray();
+
+            return String.Join(Environment.NewLine, goldenBooks);
+        }
+
+        /// <summary>
+        /// Return in a single string all titles and prices of books with price higher than 40,
+        /// each on a new row in the format given below. Order them by price descending.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string GetBooksByPrice(BookShopContext context)
+        {
+            StringBuilder output = new StringBuilder(); 
+
+            var books = context
+                .Books
+                .Where(b => b.Price > 40)
+                .Select(b => new
+                {
+                    b.Title,
+                    b.Price
+                })
+                .OrderByDescending(b => b.Price)
+                .ToArray();
+
+            foreach (var book  in books)
+            {
+                output.AppendLine($"{book.Title} - ${book.Price:f2}");
+            }
+
+            return output.ToString().TrimEnd();
+        }
+
+        /// <summary>
+        /// Return in a single string all titles of books that are NOT released on a given year.
+        /// Order them by book id ascending.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="year"></param>
+        /// <returns></returns>
+        public static string GetBooksNotReleasedIn(BookShopContext context, int year)
+        {
+            var books = context
+                .Books
+                .Where(b => b.ReleaseDate.Value.Year != year)
+                .Select(b => b.Title)
+                .ToArray();
+
+            return String.Join(Environment.NewLine, books);
+        }
+
+        /// <summary>
+        /// Return in a single string the titles of books by a given list of categories.
+        /// The list of categories will be given in a single line separated with one or more spaces.
+        /// Ignore casing. Order by title alphabetically.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string GetBooksByCategory(BookShopContext context, string input)
+        {
+            string[] categories = input.ToLower().Split(' ');
+
+            var book = context
+                .Books
+                .Where(b => b.BookCategories
+                    .Any(bc => categories
+                    .Contains(bc.Category.Name.ToLower())))
+                .Select(b => b.Title)
+                .OrderBy(t => t)
+                .ToArray();
+              
+            return String.Join(Environment.NewLine, book);
+        }
+
+        /// <summary>
+        /// Return the title, edition type and price of all books that are released before a given date.
+        /// The date will be a string in format dd-MM-yyyy.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        public static string GetBooksReleasedBefore(BookShopContext context, string date)
+        {
+            StringBuilder output = new StringBuilder();
+
+            int[] input = date
+                .Split('-')
+                .Select(int.Parse)
+                .ToArray();
+
+            DateTime dateTime = new DateTime(input[2], input[1], input[0]);
+
+            var books = context
+                .Books
+                .Where(b => b.ReleaseDate < dateTime )
+                .Select(b => new
+                {
+                    b.Title,
+                    b.EditionType,
+                    b.Price,
+                    b.ReleaseDate
+                })
+                .OrderByDescending(b => b.ReleaseDate)
+                .ToArray();
+
+            foreach (var book in books)
+            {
+                output.AppendLine($"{book.Title} - {book.EditionType} - ${book.Price:f2}");
+            }
+
+            return output.ToString().TrimEnd();
+        }
+
+        /// <summary>
+        /// Return the full names of authors, whose first name ends with a given string.
+        ///Return all names in a single string, each on a new row, ordered alphabetically.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string GetAuthorNamesEndingIn(BookShopContext context, string input)
+        {
+            var authors = context
+                .Authors
+                .Where(a => a.FirstName.EndsWith(input))
+                .ToArray()
+                .Select(a => $"{a.FirstName} {a.LastName}")
+                .OrderBy(a => a)
+                .ToArray();
+
+            return String.Join(Environment.NewLine, authors);
+        }
+
+        /// <summary>
+        /// Return the titles of book, which contain a given string. Ignore casing.
+        /// Return all titles in a single string, each on a new row, ordered alphabetically.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string GetBookTitlesContaining(BookShopContext context, string input)
+        {
+            var books = context
+                .Books
+                .Where(b => b.Title.ToLower().Contains(input.ToLower()))
+                .Select(b => b.Title)
+                .OrderBy(t => t)
+                .ToArray();
+
+            return String.Join(Environment.NewLine, books);
+        }
+
+        /// <summary>
+        /// Return all titles of books and their authors’ names for books,
+        /// which are written by authors whose last names start with the given string.
+        /// Return a single string with each title on a new row.Ignore casing.Order by book id ascending.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string GetBooksByAuthor(BookShopContext context, string input)
+        {
+            StringBuilder output = new StringBuilder();
+
+            var books = context
+                .Books
+                .Where(b => b.Author.LastName
+                    .ToLower()
+                    .StartsWith(input.ToLower()))
+                .Select(b => new
+                {
+                    b.Title,
+                    FullName = $"{b.Author.FirstName} {b.Author.LastName}"
+                })
+                .ToArray();
+
+            foreach (var book in books)
+            {
+                output.AppendLine($"{book.Title} ({book.FullName})");
+            }
+
+            return output.ToString().TrimEnd();
+        }
+
+        /// <summary>
+        /// Return the number of books, which have a title longer than the number given as an input.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="lengthCheck"></param>
+        /// <returns></returns>
+        public static int CountBooks(BookShopContext context, int lengthCheck)
+        {
+            int booksCount = context
+                .Books
+                .Where(b => b.Title.Length > lengthCheck)
+                .Count();
+
+            return booksCount;
+        }
+
+        /// <summary>
+        /// Return the total number of book copies for each author.
+        /// Order the results descending by total book copies.
+        /// Return all results in a single string, each on a new line.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string CountCopiesByAuthor(BookShopContext context)
+        {
+            StringBuilder output = new StringBuilder();
+
+            var authors = context
+                .Authors
+                .Select(a => new
+                {
+                    FullName = $"{a.FirstName} {a.LastName}",
+                    CopiesCount = a.Books.Sum(b => b.Copies)
+                })
+                .OrderByDescending(a => a.CopiesCount)
+                .ToArray();
+
+            foreach (var author in authors)
+            {
+                output.AppendLine($"{author.FullName} - {author.CopiesCount}");
+            }
+
+            return output.ToString().TrimEnd();
         }
     }
 }

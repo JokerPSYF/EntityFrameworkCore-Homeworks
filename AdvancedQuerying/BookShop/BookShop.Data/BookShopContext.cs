@@ -30,7 +30,7 @@ namespace BookShop.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(Config.ConnectionString);
+                optionsBuilder.UseLazyLoadingProxies().UseSqlServer(Config.ConnectionString);
             }
         }
 
