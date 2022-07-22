@@ -26,7 +26,7 @@ namespace CarDealer
             //dbContext.Database.EnsureDeleted();
             //dbContext.Database.EnsureCreated();
 
-            string json = ImportSuppliers(dbContext,filePath);
+            string json = ImportSuppliers(dbContext,inputJson);
             Console.WriteLine(json);
            // File.WriteAllText(filePath, json);
         }
@@ -58,7 +58,7 @@ namespace CarDealer
             context.Suppliers.AddRange(Suppliers);
             context.SaveChanges();
 
-            return $"Successfully imported {Suppliers.Count}";
+            return $"Successfully imported {Suppliers.Count}.";
         }
 
         private static void InitializeDatasetFilePath(string fileName)
