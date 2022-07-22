@@ -1,4 +1,4 @@
-﻿namespace ProductShop.DTOs.User
+﻿    namespace ProductShop.DTOs.User
 {
     using System.ComponentModel.DataAnnotations;
 
