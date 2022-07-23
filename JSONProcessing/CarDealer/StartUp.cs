@@ -28,12 +28,12 @@ namespace CarDealer
             // InitializeDatasetFilePath("sales.json");
             //string inputJson = File.ReadAllText(filePath);
 
-            InitializeOutputFilePath("ordered-customers.json");
+            InitializeOutputFilePath("cars-and-parts.json");
 
             //dbContext.Database.EnsureDeleted();
             //dbContext.Database.EnsureCreated();
 
-            string json = GetOrderedCustomers(dbContext);
+            string json = GetCarsWithTheirListOfParts(dbContext);
             Console.WriteLine(json);
             File.WriteAllText(filePath, json);
         }
@@ -207,16 +207,25 @@ namespace CarDealer
             return $"Successfully imported {sales.Count}.";
         }
 
+        /// <summary>
+        /// Problem 14
+        /// Get all customers ordered by their birth date ascending. 
+        /// If two customers are born on the same date first print 
+        /// those who are not young drivers (e.g., print experienced drivers first).
+        /// Export the list of customers to JSON in the format provided below.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public static string GetOrderedCustomers(CarDealerContext context)
         {
-            var customers = context
+            GetOrderedCustomersDTO[] customers = context
                 .Customers
                 .OrderBy(c => c.BirthDate)
                 .ThenBy(c => c.IsYoungDriver)
-                .Select(c => new
+                .Select(c => new GetOrderedCustomersDTO
                 {
                     Name = c.Name,
-                    BirthDate = c.BirthDate.ToString("dd/MM/yyyy"),
+                    BirthDate = c.BirthDate,
                     IsYoungDriver = c.IsYoungDriver
                 })
                 .ToArray();
@@ -224,6 +233,152 @@ namespace CarDealer
             string json = JsonConvert.SerializeObject(customers, Formatting.Indented);
 
             return json;
+        }
+
+        /// <summary>
+        /// Problem 15
+        /// Get all cars from making Toyota and order them by
+        /// model alphabetically and by traveled distance descending.
+        /// Export the list of cars to JSON in the format provided below.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string GetCarsFromMakeToyota(CarDealerContext context)
+        {
+            GetToyotaCarsDTO[] toyotaCars = context
+                .Cars
+                .Where(c => c.Make == "Toyota")
+                .Select(c => new GetToyotaCarsDTO
+                {
+                    Id = c.Id,
+                    Make = c.Make,
+                    Model = c.Model,
+                    TravelledDistance = c.TravelledDistance
+                })
+                .OrderBy(c => c.Model)
+                .ThenByDescending(c => c.TravelledDistance)
+                .ToArray();
+
+            string json = JsonConvert.SerializeObject(toyotaCars, Formatting.Indented);
+
+            return json;
+        }
+
+        /// <summary>
+        /// Problem 16
+        /// Get all suppliers that do not import parts from abroad.
+        /// Get their id, name and the number of parts they can offer to supply.
+        /// Export the list of suppliers to JSON in the format provided below.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string GetLocalSuppliers(CarDealerContext context)
+        {
+            ExportLocalSuppliersDTO[] suppliers = context
+                .Suppliers
+                .Where(s => s.IsImporter == false)
+                .Select(s => new ExportLocalSuppliersDTO
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    PartsCount = s.Parts.Count
+                })
+                .ToArray();
+
+            string json = JsonConvert.SerializeObject(suppliers, Formatting.Indented);
+
+            return json;
+        }
+
+        /// <summary>
+        /// Problem 17
+        /// Get all cars along with their list of parts. 
+        /// For the car get only make, model and traveled
+        /// distance and for the parts get only name and price
+        /// (formatted to 2nd digit after the decimal point). 
+        /// Export the list of cars and their parts to JSON in the format provided below.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string GetCarsWithTheirListOfParts(CarDealerContext context)
+        {
+            //var cars = context
+            //    .Cars
+            //    .Select(c => new
+            //    {
+            //        car = new
+            //        {
+            //            c.Make,
+            //            c.Model,
+            //            c.TravelledDistance
+            //        },
+            //        parts = c.PartCars.Select(pc => new
+            //        {
+            //            pc.Part.Name,
+            //            Price = pc.Part.Price.ToString("F2")
+            //        })
+            //    })
+            //    .ToArray();
+
+            //ExportCarDTO[] cars = context
+            //    .Cars
+            //    .Select(c => new ExportCarDTO
+            //    {
+            //        Make = c.Make,
+            //        Model = c.Model,
+            //        TravelledDistance = c.TravelledDistance,
+            //        Parts = c.PartCars
+            //        .Select(pc => new GetPartsDTO()
+            //        {
+            //            Name = pc.Part.Name,
+            //            Price = pc.Part.Price.ToString("f2")
+            //        })
+            //        .ToArray()
+            //    }).ToArray();
+
+            var cars = context.Cars
+              .Select(c => new
+              {
+                  car = new
+                  {
+                      c.Make,
+                      c.Model,
+                      c.TravelledDistance
+                  },
+                  parts = c.PartCars.Select(pc => new
+                  {
+                      pc.Part.Name,
+                      Price = pc.Part.Price.ToString("F2")
+                  })
+              })
+              .ToArray();
+
+
+            string json = JsonConvert.SerializeObject(cars, Formatting.Indented);
+
+            return json;
+        }
+
+        /// <summary>
+        /// Get all customers that have bought at least 1 car and get their names,
+        /// bought cars count and total spent money on cars.
+        /// Order the result list by total spent money descending
+        /// then by total bought cars again in descending order.
+        /// Export the list of customers to JSON in the format provided below.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string GetTotalSalesByCustomer(CarDealerContext context)
+        {
+            var customer = context
+                .Customers
+                .Select(c => new
+                {
+
+                })
+                .ToArray();
+
+            return null;
         }
 
         //Usable methods
