@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace CarDealer.DTO
+namespace CarDealer.DTO.Suppliers
 {
     [JsonObject]
     public class ImportSuppliersDto
