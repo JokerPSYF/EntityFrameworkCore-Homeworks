@@ -399,41 +399,24 @@ namespace CarDealer
         /// <returns></returns>
         public static string GetSalesWithAppliedDiscount(CarDealerContext context)
         {
-            var saless = context
-                .Sales
-                .Select(s => new
-                {
-                    car = new
-                    {
-                        s.Car.Make,
-                        s.Car.Model,
-                        s.Car.TravelledDistance
-                    },
-                    customerName = s.Customer.Name,
-                    Discount = s.Discount.ToString("F2"),
-                    price = s.Car.PartCars.Sum(p => p.Part.Price).ToString("f2"),
-                    priceWithDscount = (s.Car.PartCars.Sum(p => p.Part.Price) - s.Car.PartCars.Sum(p => p.Part.Price s.Discount / 100).ToString("F2")
-                })
-                .Take(10)
-                .ToList();
-
-            var sales = context.Sales.Select(x => new
+            var sales = context.Sales.Select(s => new
             {
                 car = new
                 {
-                    x.Car.Make,
-                    x.Car.Model,
-                    x.Car.TravelledDistance
+                    s.Car.Make,
+                    s.Car.Model,
+                    s.Car.TravelledDistance
                 },
-                customerName = x.Customer.Name,
-                Discount = x.Discount.ToString("F2"),
-                price = x.Car.PartCars.Sum(p => p.Part.Price).ToString("F2"),
-                priceWithDiscount = (x.Car.PartCars.Sum(p => p.Part.Price) - x.Car.PartCars.Sum(p => p.Part.Price) * x.Discount / 100).ToString("F2")
+                customerName = s.Customer.Name,
+                Discount = s.Discount.ToString("F2"),
+                price = s.Car.PartCars.Sum(p => p.Part.Price).ToString("f2"),
+                priceWithDiscount = (s.Car.PartCars.Sum(p => p.Part.Price)
+                - s.Car.PartCars.Sum(p => p.Part.Price) * s.Discount / 100).ToString("F2")
             })
-          .Take(10)
-          .ToList();
+                .Take(10)
+                .ToArray();
 
-            return JsonConvert.SerializeObject(saless, Formatting.Indented);
+            return JsonConvert.SerializeObject(sales, Formatting.Indented);
         }
         //Usable methods
         private static void InitializeDatasetFilePath(string fileName)
