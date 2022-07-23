@@ -28,12 +28,12 @@ namespace CarDealer
             // InitializeDatasetFilePath("sales.json");
             //string inputJson = File.ReadAllText(filePath);
 
-            InitializeOutputFilePath("cars-and-parts.json");
+            InitializeOutputFilePath("sales-discounts.json");
 
             //dbContext.Database.EnsureDeleted();
             //dbContext.Database.EnsureCreated();
 
-            string json = GetCarsWithTheirListOfParts(dbContext);
+            string json = GetSalesWithAppliedDiscount(dbContext);
             Console.WriteLine(json);
             File.WriteAllText(filePath, json);
         }
@@ -360,6 +360,7 @@ namespace CarDealer
         }
 
         /// <summary>
+        /// Prbolem 18
         /// Get all customers that have bought at least 1 car and get their names,
         /// bought cars count and total spent money on cars.
         /// Order the result list by total spent money descending
@@ -370,17 +371,70 @@ namespace CarDealer
         /// <returns></returns>
         public static string GetTotalSalesByCustomer(CarDealerContext context)
         {
-            var customer = context
+            var customers = context
                 .Customers
+                .Where(c => c.Sales.Count >= 1)
+                .ToArray()
                 .Select(c => new
                 {
-
+                    fullName = c.Name,
+                    boughtCars = c.Sales.Count,
+                    spentMoney = c.Sales.Sum(s => s.Car.PartCars.Sum(p => p.Part.Price))
                 })
+                .OrderByDescending(c => c.spentMoney)
+                .ThenByDescending(c => c.boughtCars)
                 .ToArray();
 
-            return null;
+            string json = JsonConvert.SerializeObject(customers, Formatting.Indented);
+
+            return json;
         }
 
+        /// <summary>
+        /// Problem 19
+        /// Get first 10 sales with information about the car, 
+        /// customer and price of the sale with and without discount. 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string GetSalesWithAppliedDiscount(CarDealerContext context)
+        {
+            var saless = context
+                .Sales
+                .Select(s => new
+                {
+                    car = new
+                    {
+                        s.Car.Make,
+                        s.Car.Model,
+                        s.Car.TravelledDistance
+                    },
+                    customerName = s.Customer.Name,
+                    Discount = s.Discount.ToString("F2"),
+                    price = s.Car.PartCars.Sum(p => p.Part.Price).ToString("f2"),
+                    priceWithDscount = (s.Car.PartCars.Sum(p => p.Part.Price) - s.Car.PartCars.Sum(p => p.Part.Price s.Discount / 100).ToString("F2")
+                })
+                .Take(10)
+                .ToList();
+
+            var sales = context.Sales.Select(x => new
+            {
+                car = new
+                {
+                    x.Car.Make,
+                    x.Car.Model,
+                    x.Car.TravelledDistance
+                },
+                customerName = x.Customer.Name,
+                Discount = x.Discount.ToString("F2"),
+                price = x.Car.PartCars.Sum(p => p.Part.Price).ToString("F2"),
+                priceWithDiscount = (x.Car.PartCars.Sum(p => p.Part.Price) - x.Car.PartCars.Sum(p => p.Part.Price) * x.Discount / 100).ToString("F2")
+            })
+          .Take(10)
+          .ToList();
+
+            return JsonConvert.SerializeObject(saless, Formatting.Indented);
+        }
         //Usable methods
         private static void InitializeDatasetFilePath(string fileName)
         {
