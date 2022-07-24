@@ -20,7 +20,8 @@
             CarDealerContext dbContext = new CarDealerContext();
             //string xml = File.ReadAllText("../../../Datasets/sales.xml");
 
-            string result = GetSalesWithAppliedDiscount(dbContext);
+            string result = GetTotalSalesByCustomer(dbContext);
+            File.WriteAllText("../../../Result/customers-total-sales", result);
             Console.WriteLine(result);
             //dbContext.Database.EnsureDeleted();
             //dbContext.Database.EnsureCreated();
@@ -28,7 +29,17 @@
             //Console.WriteLine("Database reset successfully!");
         }
 
-        //Problem 09
+
+
+        /// <summary>
+        /// Problem 9
+        /// Import the suppliers from the provided file suppliers.xml. 
+        ///Your method should return a string with the message
+        ///$"Successfully imported {suppliers.Count}";
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="inputXml"></param>
+        /// <returns></returns>
         public static string ImportSuppliers(CarDealerContext context, string inputXml)
         {
             XmlRootAttribute xmlRoot = new XmlRootAttribute("Suppliers");
@@ -52,7 +63,16 @@
             return $"Successfully imported {suppliers.Length}";
         }
 
-        //Problem 10
+        /// <summary>
+        ///  Problem 10
+        /// Import the parts from the provided file parts.xml.
+        /// If the supplierId doesn't exist, skip the record.
+        /// Your method should return a string with the message
+        /// $"Successfully imported {parts.Count}";
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="inputXml"></param>
+        /// <returns></returns>
         public static string ImportParts(CarDealerContext context, string inputXml)
         {
             XmlRootAttribute xmlRoot = new XmlRootAttribute("Parts");
@@ -86,7 +106,14 @@
             return $"Successfully imported {parts.Count}"; ;
         }
 
-        //Problem 11
+        /// <summary>
+        ///  Problem 11
+        /// Import the cars from the provided file cars.xml.
+        /// Select unique car part ids. If the part id doesn't exist, skip the part record.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="inputXml"></param>
+        /// <returns></returns>
         public static string ImportCars(CarDealerContext context, string inputXml)
         {
             XmlRootAttribute xmlRoot = new XmlRootAttribute("Cars");
@@ -131,7 +158,15 @@
             return $"Successfully imported {cars.Count}";
         }
 
-        //Problem 12
+        /// <summary>
+        /// Problem 12
+        /// Import the customers from the provided file customers.xml.
+        /// Your method should return a string with the message
+        /// $"Successfully imported {customers.Count}";
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="inputXml"></param>
+        /// <returns></returns>
         public static string ImportCustomers(CarDealerContext context, string inputXml)
         {
             string rootName = "Customers";
@@ -151,7 +186,16 @@
             return $"Successfully imported {customers.Length}";
         }
 
-        //Problem 13
+        /// <summary>
+        /// Problem 13
+        /// Import the sales from the provided file sales.xml.
+        /// If car doesn't exist, skip whole entity.
+        /// Your method should return a string with the message 
+        /// $"Successfully imported {sales.Count}";
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="inputXml"></param>
+        /// <returns></returns>
         public static string ImportSales(CarDealerContext context, string inputXml)
         {
             string rootName = "Sales";
@@ -180,7 +224,13 @@
             return $"Successfully imported {sales.Count}";
         }
 
-        //Problem 14
+        /// <summary>
+        /// Problem 14
+        /// Get all cars with a distance of more than 2,000,000.
+        /// Order them by make, then by model alphabetically. Take top 10 records.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public static string GetCarsWithDistance(CarDealerContext context)
         {
             StringBuilder sb = new StringBuilder();
@@ -211,7 +261,13 @@
             return sb.ToString().TrimEnd();
         }
 
-        //Problem 15
+        /// <summary>
+        /// Problem 15
+        /// Get all cars from make BMW and order them by model
+        /// alphabetically and by traveled distance descending.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public static string GetCarsFromMakeBmw(CarDealerContext context)
         {
             StringBuilder sb = new StringBuilder();
@@ -241,7 +297,13 @@
             return sb.ToString().TrimEnd();
         }
 
-        //Problem 16
+        /// <summary>
+        /// Problem 16
+        /// Get all cars from make BMW and order them by model
+        /// alphabetically and by traveled distance descending.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public static string GetLocalSuppliers(CarDealerContext context)
         {
             ExportLocalSuppliersDto[] localSuppliers = context
@@ -258,7 +320,17 @@
             return Serialize(localSuppliers, "suppliers");
         }
 
-        //Problem 17
+        /// <summary>
+        /// Problem 18
+        /// Get all cars along with their list of parts.
+        /// For the car get only make, model and traveled
+        /// distance and for the parts get only name and price 
+        /// and sort all parts by price (descending).
+        /// Sort all cars by traveled distance (descending)
+        /// then by the model (ascending). Select top 5 records.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public static string GetCarsWithTheirListOfParts(CarDealerContext context)
         {
             ExportCarsWithPartsDto[] cars = context
@@ -285,7 +357,40 @@
             return Serialize(cars, "cars");
         }
 
-        //Problem 19
+        /// <summary>
+        /// Problem 19
+        /// Get all customers that have bought at least 1 car and get their names,
+        /// bought cars count. and total spent money on cars.
+        /// Order the result list by total spent money descending.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static string GetTotalSalesByCustomer(CarDealerContext context)
+        {
+            ExportCustomerSaleDTO[] customers = context
+               .Customers
+               .Where(c => c.Sales.Count >= 1)
+               .ToArray()
+               .Select(c => new ExportCustomerSaleDTO()
+               {
+                   FullName = c.Name,
+                   BoughtCars = c.Sales.Count,
+                   SpentMoney = c.Sales.Sum(s => s.Car.PartCars.Sum(p => p.Part.Price))
+               })
+               .OrderByDescending(c => c.SpentMoney)
+               .ThenByDescending(c => c.BoughtCars)
+               .ToArray();
+
+            return Serialize(customers, "customers");
+        }
+
+        /// <summary>
+        /// Problem 19
+        /// Get all sales with information about the car,
+        /// customer and price of the sale with and without discount.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public static string GetSalesWithAppliedDiscount(CarDealerContext context)
         {
             ExportSaleDto[] sales = context
