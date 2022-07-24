@@ -256,10 +256,10 @@ namespace ProductShop
         {
 
                 List<ExportUserAndProducts> users = context.Users
-                  .Include(x => x.ProductsSold) // not needed, added for Judge & ToList()                
+                  .Include(x => x.ProductsSold)              
                   .Where(x => x.ProductsSold.Count > 0)
                   .OrderByDescending(x => x.ProductsSold.Count)
-                  .ToList() // not needed, added for Judge
+                  .ToList()
                   .Select(u => new ExportUserAndProducts
                   {
                       FirstName = u.FirstName,
