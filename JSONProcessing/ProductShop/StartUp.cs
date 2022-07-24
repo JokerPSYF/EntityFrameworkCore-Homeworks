@@ -20,7 +20,7 @@
     public class StartUp
     {
         private static string filePath;
-
+        // JSON
         public static void Main(string[] args)
         {
             Mapper.Initialize(cfg => cfg.AddProfile(typeof(ProductShopProfile)));
