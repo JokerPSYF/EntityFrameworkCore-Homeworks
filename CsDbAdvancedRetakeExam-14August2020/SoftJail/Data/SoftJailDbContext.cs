@@ -39,10 +39,8 @@
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			builder
-				.Entity<OfficerPrisoner>(e =>
-				{
-					e.HasKey(k => new { k.OfficerId, k.PrisonerId });
-				});
+				.Entity<OfficerPrisoner>()
+				.HasKey(k => new { k.PrisonerId, k.OfficerId });
 				
 		}
     }
