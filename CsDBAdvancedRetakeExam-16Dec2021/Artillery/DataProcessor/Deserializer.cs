@@ -52,7 +52,7 @@
                 sb.AppendLine($"Successfully import {validCountry.CountryName} with {validCountry.ArmySize} army personnel.");
             }
 
-            context.AddRange(validCaounries);
+            context.Countries.AddRange(validCaounries);
             context.SaveChanges();
 
             return sb.ToString().Trim();
@@ -94,7 +94,7 @@
                     $" founded in {place[place.Length - 2 ]}, {place[place.Length - 1]}.");
             }
 
-            context.AddRange(validManufacturers);
+            context.Manufacturers.AddRange(validManufacturers);
             context.SaveChanges();
 
             return sb.ToString().Trim();
@@ -125,7 +125,7 @@
                 sb.AppendLine($"Successfully import shell caliber #{validShell.Caliber} weight {validShell.ShellWeight} kg.");
             }
 
-            context.AddRange(listWithValidShells);
+            context.Shells.AddRange(listWithValidShells);
             context.SaveChanges();
 
             return sb.ToString().Trim();
@@ -163,11 +163,12 @@
 
                 foreach (var countryId in gundto.Countries)
                 {
+                    Country country = context.Countries.Where(x => x.Id == countryId.Id).First();
 
                     CountryGun countryGun = new CountryGun()
                     {
-                        CountryId = countryId.Id,
-                        Gun = gun
+                        Gun = gun,
+                        CountryId = countryId.Id
                     };
 
                     gun.CountriesGuns.Add(countryGun);
@@ -177,7 +178,7 @@
                 sb.AppendLine($"Successfully import gun {gunType} with a total weight of {gun.GunWeight} kg. and barrel length of {gun.BarrelLength} m.");
             }
 
-            context.Guns.AddRange(listOfValidGuns);
+            context.AddRange(listOfValidGuns);
             context.SaveChanges();
 
             return sb.ToString().Trim();

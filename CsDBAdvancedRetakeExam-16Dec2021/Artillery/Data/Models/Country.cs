@@ -7,6 +7,11 @@ namespace Artillery.Data.Models
 {
     public class Country
     {
+        public Country()
+        {
+            this.CountriesGuns = new List<CountryGun>();
+        }
+
         [Key]
         public int Id { get; set; }
 

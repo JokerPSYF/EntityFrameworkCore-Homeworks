@@ -7,6 +7,11 @@ namespace Artillery.Data.Models
 {
     public class Manufacturer
     {
+        public Manufacturer()
+        {
+            this.Guns = new List<Gun>();
+        }
+
         [Key]
         public int Id { get; set; }
 

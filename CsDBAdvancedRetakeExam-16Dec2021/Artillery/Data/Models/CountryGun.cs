@@ -14,6 +14,7 @@ namespace Artillery.Data.Models
         [ForeignKey(nameof(Gun))]
         public int GunId{ get; set; }
         public virtual Gun Gun{ get; set; }
+       
     }
 }
 //•	CountryId – Primary Key integer, foreign key (required)
