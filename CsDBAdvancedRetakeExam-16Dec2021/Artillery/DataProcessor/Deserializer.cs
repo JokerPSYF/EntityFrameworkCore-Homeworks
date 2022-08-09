@@ -141,10 +141,7 @@
 
             foreach (var gundto in gunsDTOs)
             {
-                GunType gunType;
-                bool IsGunTypeValid = Enum.TryParse<GunType>(gundto.GunType, true, out gunType);
-
-                if (!IsValid(gundto) || !IsGunTypeValid)
+                if (!IsValid(gundto) )
                 {
                     sb.AppendLine(ErrorMessage);
                     continue;
@@ -157,25 +154,19 @@
                     BarrelLength = gundto.BarrelLength,
                     NumberBuild = gundto.NumberBuild,
                     Range = gundto.Range,
-                    GunType = gunType,
+                    GunType = Enum.Parse<GunType>(gundto.GunType),
                     ShellId = gundto.ShellId,
+                    CountriesGuns = gundto.Countries.Select(c => new CountryGun
+                    {
+                        CountryId = c.Id
+                    })
+                    .ToArray()
                 };
 
-                foreach (var countryId in gundto.Countries)
-                {
-                    Country country = context.Countries.Where(x => x.Id == countryId.Id).First();
-
-                    CountryGun countryGun = new CountryGun()
-                    {
-                        Gun = gun,
-                        CountryId = countryId.Id
-                    };
-
-                    gun.CountriesGuns.Add(countryGun);
-                }
 
                 listOfValidGuns.Add(gun);
-                sb.AppendLine($"Successfully import gun {gunType} with a total weight of {gun.GunWeight} kg. and barrel length of {gun.BarrelLength} m.");
+                sb.AppendLine($"Successfully import gun {gun.GunType} with a total " +
+                    $"weight of {gun.GunWeight} kg. and barrel length of {gun.BarrelLength} m.");
             }
 
             context.AddRange(listOfValidGuns);

@@ -33,6 +33,7 @@ namespace Artillery.DataProcessor.ImportDto
 
         [Required]
         [JsonProperty("GunType")]
+        [EnumDataType(typeof(GunType))]
         public string GunType { get; set; }
 
         [Required]
