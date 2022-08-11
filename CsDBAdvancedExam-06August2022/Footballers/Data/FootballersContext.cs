@@ -25,7 +25,7 @@
             if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder
-                    .UseSqlServer(Configuration.ConnectionString);
+                    .UseSqlServer(Config.ConnectionString);
             }
 
         }
