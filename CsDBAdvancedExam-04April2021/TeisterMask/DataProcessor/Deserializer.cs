@@ -4,9 +4,14 @@
     using System.Collections.Generic;
 
     using System.ComponentModel.DataAnnotations;
-
+    using System.Globalization;
+    using System.IO;
+    using System.Text;
+    using System.Xml.Serialization;
     using Data;
-
+    using TeisterMask.Data.Models;
+    using TeisterMask.Data.Models.Enums;
+    using TeisterMask.DataProcessor.ImportDto;
     using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContext;
 
     public class Deserializer
@@ -21,7 +26,104 @@
 
         public static string ImportProjects(TeisterMaskContext context, string xmlString)
         {
-            throw new NotImplementedException();
+            StringBuilder sb = new StringBuilder();
+
+            List<Project> validProjects = new List<Project>();
+
+            ImportProjectDTO[] projDtos = Deserialize<ImportProjectDTO[]>(xmlString, "Projects");
+
+            foreach (var projD in projDtos)
+            {
+                if (!IsValid(projD))
+                {
+                    sb.AppendLine(ErrorMessage);
+                    continue;
+                }
+
+                bool isProjectOpenDateValid=
+                                  DateTime.TryParseExact(projD.OpenDate, "dd/MM/yyyy",
+                                  CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime openDate);
+
+                if (!isProjectOpenDateValid)
+                {
+                    sb.AppendLine(ErrorMessage);
+                    continue;
+                }
+
+                DateTime? dueDate = null;
+
+                if (!String.IsNullOrEmpty(projD.DueDate)) 
+                {
+                    bool isProjectDueDateValid =
+                                 DateTime.TryParseExact(projD.DueDate, "dd/MM/yyyy",
+                                 CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dueDateValue);
+
+                    if (!isProjectDueDateValid)
+                    {
+                        sb.AppendLine(ErrorMessage);
+                        continue;
+                    }
+
+                    dueDate = dueDateValue;
+                }
+
+
+                Project project = new Project()
+                {
+                    Name = projD.Name,
+                    OpenDate = openDate,
+                    DueDate = dueDate,
+                };
+
+                foreach (var task in projD.Tasks)
+                {
+                    if (!IsValid(task))
+                    {
+                        sb.AppendLine(ErrorMessage);
+                        continue;
+                    }
+
+                    bool isTaskOpenDateValid =
+                                DateTime.TryParseExact(task.OpenDate, "dd/MM/yyyy",
+                                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime taskOpenDate);
+
+                    bool isTaskDueDateValid =
+                                DateTime.TryParseExact(task.DueDate, "dd/MM/yyyy",
+                                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime taskDueDate);
+
+                    if (!isTaskDueDateValid | !isTaskOpenDateValid)
+                    {
+                        sb.AppendLine(ErrorMessage);
+                        continue;
+                    }
+
+                    if (taskOpenDate < openDate|| taskDueDate > dueDate)
+                    {
+                        sb.AppendLine(ErrorMessage);
+                        continue;
+
+                    }
+
+                    Task validTask = new Task()
+                    {
+                        Name = task.Name,
+                        OpenDate = taskOpenDate,
+                        DueDate = taskDueDate,
+                        ExecutionType = (ExecutionType)task.ExecutionType,
+                        LabelType = (LabelType)task.LabelType
+                    };
+
+                    project.Tasks.Add(validTask);
+                }
+
+                validProjects.Add(project);
+                sb.AppendLine(String.Format(SuccessfullyImportedProject, project.Name, project.Tasks.Count));
+
+            }
+            context.Projects.AddRange(validProjects);
+            context.SaveChanges();
+
+            return sb.ToString().Trim();
         }
 
         public static string ImportEmployees(TeisterMaskContext context, string jsonString)
@@ -35,6 +137,18 @@
             var validationResult = new List<ValidationResult>();
 
             return Validator.TryValidateObject(dto, validationContext, validationResult, true);
+        }
+
+        private static T Deserialize<T>(string inputXml, string rootName)
+        {
+            XmlRootAttribute xmlRoot = new XmlRootAttribute(rootName);
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(T), xmlRoot);
+
+            using StringReader reader = new StringReader(inputXml);
+            T dtos = (T)xmlSerializer
+                .Deserialize(reader);
+
+            return dtos;
         }
     }
 }
