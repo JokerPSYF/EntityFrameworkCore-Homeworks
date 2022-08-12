@@ -6,9 +6,11 @@
     using System.ComponentModel.DataAnnotations;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Xml.Serialization;
     using Data;
+    using Newtonsoft.Json;
     using TeisterMask.Data.Models;
     using TeisterMask.Data.Models.Enums;
     using TeisterMask.DataProcessor.ImportDto;
@@ -128,7 +130,53 @@
 
         public static string ImportEmployees(TeisterMaskContext context, string jsonString)
         {
-            throw new NotImplementedException();
+            StringBuilder sb = new StringBuilder();
+
+            List<Employee> validEmployees = new List<Employee>();
+
+            ImportEmployeeDTO[] empDtos = JsonConvert.DeserializeObject<ImportEmployeeDTO[]>(jsonString);
+
+            foreach (var emp in empDtos)
+            {
+                if (!IsValid(emp))
+                {
+                    sb.AppendLine(ErrorMessage);
+                    continue;
+                }
+
+                Employee validEmp = new Employee()
+                {
+                    Username = emp.Username,
+                    Email = emp.Email,
+                    Phone = emp.Phone
+                };
+
+                foreach (var task in emp.Tasks.Distinct())
+                {
+                    if (!IsValid(task) || !context.Tasks.Any(x => x.Id == task))
+                    {
+                        sb.AppendLine(ErrorMessage);
+                        continue;
+                    }
+
+                    EmployeeTask employeeTask = new EmployeeTask()
+                    {
+                        Employee = validEmp,
+                        TaskId = task
+                    };
+
+                    validEmp.EmployeesTasks.Add(employeeTask);
+                }
+                validEmployees.Add(validEmp);
+
+                sb.AppendLine(String.Format(SuccessfullyImportedEmployee,
+                                                       validEmp.Username,
+                                                       validEmp.EmployeesTasks.Count));
+            }
+            context.Employees.AddRange(validEmployees);
+            context.SaveChanges();
+
+            return sb.ToString().Trim();
         }
 
         private static bool IsValid(object dto)
