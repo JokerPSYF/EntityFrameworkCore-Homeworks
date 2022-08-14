@@ -21,7 +21,6 @@ namespace VaporStore.Data.Models
         public string Name { get; set; }
 
         [Range(0, double.MaxValue)]
-        [Required]
         public decimal Price { get; set; }
 
         [Required]
@@ -37,7 +36,6 @@ namespace VaporStore.Data.Models
 
         public virtual ICollection<Purchase> Purchases { get; set; }
 
-        [Required]
         public virtual ICollection<GameTag> GameTags { get; set; }
     }
 

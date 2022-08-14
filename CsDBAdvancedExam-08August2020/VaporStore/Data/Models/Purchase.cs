@@ -28,7 +28,7 @@ namespace VaporStore.Data.Models
 
         [ForeignKey(nameof(Game))]
         public int GameId { get; set; }
-        public virtual Game Game { get; set; }
+        public virtual Game Game { get; set;     }
     }
 }
 
