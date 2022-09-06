@@ -1,4 +1,9 @@
-﻿namespace MiniORM
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace MiniORM
 {
     public class DbSet<TEntity> : ICollection<TEntity>
         where TEntity : class, new()
