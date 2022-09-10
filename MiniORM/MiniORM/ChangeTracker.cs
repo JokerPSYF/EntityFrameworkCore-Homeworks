@@ -14,7 +14,7 @@ namespace MiniORM
 
         public ChangeTracker(IEnumerable<T> entities)
         {
-            this.added = new List<T>;
+            this.added = new List<T>();
             this.removed = new List<T>();
 
             this.allEntities = CloneEntities(entities);
@@ -32,7 +32,7 @@ namespace MiniORM
             var clonedEntities = new List<T>();
 
             var propertiesToClone = typeof(T).GetProperties()
-                .Where(pi => DbContext.AllowedSqlTypes.Contains(pi.ProperyType))
+                .Where(pi => DbContext.AllowedSqlTypes.Contains(pi.PropertyType))
                 .ToArray();
 
             foreach(var entity in entities)
