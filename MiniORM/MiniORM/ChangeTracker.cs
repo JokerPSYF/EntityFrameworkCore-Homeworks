@@ -101,5 +101,10 @@ namespace MiniORM
 
             return isModified;
         }
+
+        internal object GetModifiedEntities<TEntity>(DbSet<TEntity> dbSet) where TEntity : class, new()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
